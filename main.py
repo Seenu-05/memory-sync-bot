@@ -35,33 +35,37 @@ async def receive_webhook(request : Request, db: Session = Depends(get_db)):
     except KeyError:
         return {"status" : "ignored"}
     
-   
-    if user_text == "/start":
-        user_account = db.query(User).filter(User.telegram_id == chat_id).first()
-        if not user_account:
-            new_user = User(telegram_id=chat_id)
-            db.add(new_user)
-            db.commit()
-        
+    if user_text.startswith("/"):
+        # Reset everything so the bot "forgets" the Good/Bad question
         redis_client.delete(f"state:{chat_id}")
         redis_client.delete(f"temp_type:{chat_id}")
+
+        if user_text == "/start":
+            user_account = db.query(User).filter(User.telegram_id == chat_id).first()
+            if not user_account:
+                new_user = User(telegram_id=chat_id)
+                db.add(new_user)
+                db.commit()
+            
+            redis_client.delete(f"state:{chat_id}")
+            redis_client.delete(f"temp_type:{chat_id}")
         
-    if user_text.startswith("/connect "):
-        try:
-            partner_id = int(user_text.split(" ")[1])
-            user_account.partner_id = partner_id
-            partner_account = db.query(User).filter(User.telegram_id == partner_id).first()
-            if not partner_account:
-                partner_account = User(telegram_id=partner_id, partner_id=chat_id)
-                db.add(partner_account)
-            else:
-                partner_account.partner_id = chat_id
-            db.commit()
-            send_reply(chat_id, f"Success! You are now securely paired with {partner_id}.")
-            send_reply(partner_id, f"Your partner (ID: {chat_id}) just connected to your vault!")
-        except Exception:
-            send_reply(chat_id, "Invalid command. Use format: /connect 12345")
-        return {"status" : "ok"}
+        if user_text.startswith("/connect "):
+            try:
+                partner_id = int(user_text.split(" ")[1])
+                user_account.partner_id = partner_id
+                partner_account = db.query(User).filter(User.telegram_id == partner_id).first()
+                if not partner_account:
+                    partner_account = User(telegram_id=partner_id, partner_id=chat_id)
+                    db.add(partner_account)
+                else:
+                    partner_account.partner_id = chat_id
+                db.commit()
+                send_reply(chat_id, f"Success! You are now securely paired with {partner_id}.")
+                send_reply(partner_id, f"Your partner (ID: {chat_id}) just connected to your vault!")
+            except Exception:
+                send_reply(chat_id, "Invalid command. Use format: /connect 12345")
+            return {"status" : "ok"}
 
     state_key = f"state:{chat_id}"
     temp_type_key = f"temp_type:{chat_id}"
