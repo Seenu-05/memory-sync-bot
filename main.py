@@ -56,7 +56,8 @@ async def receive_webhook(request : Request, db: Session = Depends(get_db)):
         
         if user_text.startswith("/connect "):
             try:
-                partner_id = int(user_text.split(" ")[1])
+                parts = user_text.replace("/connect", "").strip()
+                partner_id = int(parts)
                 user_account.partner_id = partner_id
                 partner_account = db.query(User).filter(User.telegram_id == partner_id).first()
                 if not partner_account:
