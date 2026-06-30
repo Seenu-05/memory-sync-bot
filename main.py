@@ -35,14 +35,16 @@ async def receive_webhook(request : Request, db: Session = Depends(get_db)):
     except KeyError:
         return {"status" : "ignored"}
     
-    user_account = db.query(User).filter(User.telegram_id == chat_id).first()
-    if not user_account:
-        new_user = User(telegram_id = chat_id)
-        db.add(new_user)
-        db.commit()
-        if user_text == "/start":
-            send_reply(chat_id, f"Welcome! Your ID is {chat_id}. Send this ID to your partner so they can connect with you using /connect {chat_id}")
-            return {"status" : "ok"}
+   
+    if user_text == "/start":
+        user_account = db.query(User).filter(User.telegram_id == chat_id).first()
+        if not user_account:
+            new_user = User(telegram_id=chat_id)
+            db.add(new_user)
+            db.commit()
+        
+        redis_client.delete(f"state:{chat_id}")
+        redis_client.delete(f"temp_type:{chat_id}")
         
     if user_text.startswith("/connect "):
         try:
