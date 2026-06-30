@@ -49,6 +49,10 @@ async def receive_webhook(request : Request, db: Session = Depends(get_db)):
             
             redis_client.delete(f"state:{chat_id}")
             redis_client.delete(f"temp_type:{chat_id}")
+
+            send_reply(chat_id, f"Welcome! Your ID is {chat_id}. Send this ID to your partner so they can connect with you using /connect {chat_id}")
+
+            return {"status": "ok"}
         
         if user_text.startswith("/connect "):
             try:
