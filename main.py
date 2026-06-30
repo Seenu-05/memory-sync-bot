@@ -9,13 +9,15 @@ from models import User
 from security import MemoryVault
 import redis
 import requests
+from database import engine, Base
+import models
 
 load_dotenv()
 MASTER_KEY = os.getenv("AES_MASTER_KEY")
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 vault = MemoryVault(MASTER_KEY)
 
-
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 redis_client = redis.Redis.from_url(os.getenv("REDIS_URL"), decode_responses = True)
