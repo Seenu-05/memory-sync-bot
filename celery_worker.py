@@ -21,10 +21,13 @@ vault = MemoryVault(MASTER_KEY)
 
 Base.metadata.create_all(bind=engine)
 
-app = Celery(
-    'memory_tasks',
-    broker=os.getenv("REDIS_URL")
-)
+celery_config = {
+    'broker_url': os.getenv("REDIS_URL"),
+    'broker_use_ssl': {'ssl_cert_reqs': None}, # This disables strict certificate checking for the cloud connection
+}
+
+app = Celery('memory_tasks')
+app.conf.update(celery_config)
 
 app.conf.broker_transport_options = {'protocol': 2}
 
