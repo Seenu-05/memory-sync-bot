@@ -58,6 +58,11 @@ async def receive_webhook(request : Request, db: Session = Depends(get_db)):
             try:
                 parts = user_text.replace("/connect", "").strip()
                 partner_id = int(parts)
+                user_account = db.query(User).filter(User.telegram_id == chat_id).first()
+                if not user_account:
+                    user_account = User(telegram_id=chat_id)
+                    db.add(user_account)
+                    db.commit()
                 user_account.partner_id = partner_id
                 partner_account = db.query(User).filter(User.telegram_id == partner_id).first()
                 if not partner_account:
