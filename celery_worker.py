@@ -35,7 +35,7 @@ app.conf.timezone = 'Asia/Kolkata'
 app.conf.beat_schedule = {
     'execute-weekend-cleanup': {
         'task' : 'celery_worker.weekend_cleanup',
-        'schedule' : crontab(hour=9, minute=0, day_of_week=0),
+        'schedule' : crontab(day_of_week='sunday', hour=11, minute=0),
     },
 }
 
