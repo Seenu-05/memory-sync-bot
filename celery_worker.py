@@ -31,6 +31,7 @@ app.conf.update(celery_config)
 
 app.conf.broker_transport_options = {'protocol': 2}
 
+app.conf.timezone = 'Asia/Kolkata'
 app.conf.beat_schedule = {
     'execute-weekend-cleanup': {
         'task' : 'celery_worker.weekend_cleanup',
