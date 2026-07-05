@@ -35,7 +35,7 @@ app.conf.timezone = 'Asia/Kolkata'
 app.conf.beat_schedule = {
     'execute-weekend-cleanup': {
         'task' : 'celery_worker.weekend_cleanup',
-        'schedule' : crontab(day_of_week='sunday', hour=11, minute=0),
+        'schedule' : crontab(day_of_week='sunday', hour=11, minute=30),
     },
 }
 
@@ -98,7 +98,7 @@ def weekend_cleanup():
                 send_telegram_message.delay(partner_id, user_summary)
             if partner_memories:
                 partner_summary = "💌 *Your Partner's Week in Review*\n\n"
-                for mem in user_memories:
+                for mem in partner_memories:
                     clean = vault.unlock(mem.encrypted_text)
                     partner_summary += f"• [{mem.memory_type}] {clean}\n"
                 send_telegram_message.delay(partner_id, partner_summary)
