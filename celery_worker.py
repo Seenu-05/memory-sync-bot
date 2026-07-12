@@ -101,7 +101,7 @@ def weekend_cleanup():
                 for mem in partner_memories:
                     clean = vault.unlock(mem.encrypted_text)
                     partner_summary += f"• [{mem.memory_type}] {clean}\n"
-                send_telegram_message.delay(partner_id, partner_summary)
+                send_telegram_message.delay(user_id, partner_summary)
 
             processed_ids.add(user_id)
             processed_ids.add(partner_id)
