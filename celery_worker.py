@@ -10,6 +10,7 @@ from database import engine, Base, SessionLocal
 from models import Memory
 from models import User
 from models import DeadLetter
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -78,6 +79,7 @@ def weekend_cleanup():
     try:
         paired_users = db.query(User).filter(User.partner_id.isnot(None)).all()
         processed_ids = set()
+        two_week_ago = datetime.utc() - timedelta(day=14)
 
         for user in paired_users:
             if user.telegram_id in processed_ids:
@@ -87,8 +89,8 @@ def weekend_cleanup():
             partner_id = user.partner_id
             print(f"[BEAT] Swapping vaults for {user_id} and {partner_id}...")
 
-            user_memories = db.query(Memory).filter(Memory.user_id==user_id).all()
-            partner_memories = db.query(Memory).filter(Memory.user_id == partner_id).all()
+            user_memories = db.query(Memory).filter(Memory.user_id==user_id, Memory.created_at>=two_week_ago).all()
+            partner_memories = db.query(Memory).filter(Memory.user_id == partner_id, Memory.created_at>=two_week_ago).all()
             
             if user_memories:
                 user_summary = "💌 *Your Partner's Week in Review*\n\n"
