@@ -28,4 +28,4 @@ jobs:
       env:
         ENCRYPTION_KEY: "12345678901234567890123456789012"
       run: |
-        pytest tests/
+        python -m pytest tests/
